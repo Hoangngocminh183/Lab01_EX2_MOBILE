@@ -24,8 +24,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView resultText;
     private ImageView emojiView; // Thêm ImageView để hiển thị cảm xúc
 
-    private static final String API_KEY = "AIzaSyByqG57Bzks_dzvVD5CD3Vo9x1Zr1Id2uE";
-    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY;
+    //private static final String API_KEY = "AIzaSyByqG57Bzks_dzvVD5CD3Vo9x1Zr1Id2uE";
+    //private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY;
+    private static final String API_URL = "https://a0ba-34-86-63-110.ngrok-free.app/predict";
     private static final String TAG = "API_DEBUG";
 
     @Override
@@ -61,18 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
         JSONObject jsonObject = new JSONObject();
         try {
-            JSONObject contentObject = new JSONObject();
-            JSONArray partsArray = new JSONArray();
-
-            JSONObject textObject = new JSONObject();
-            textObject.put("text", "Analyze the sentiment of this text: " + text);
-            partsArray.put(textObject);
-
-            contentObject.put("parts", partsArray);
-            JSONArray contentsArray = new JSONArray();
-            contentsArray.put(contentObject);
-
-            jsonObject.put("contents", contentsArray);
+            jsonObject.put("text", text); // Chỉ gửi text thay vì cấu trúc phức tạp
         } catch (JSONException e) {
             Log.e(TAG, "Lỗi tạo JSON request: " + e.getMessage());
         }
@@ -96,7 +86,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Response từ API: " + responseData);
 
                 try {
-                    String sentiment = extractSentiment(responseData);
+                    JSONObject jsonResponse = new JSONObject(responseData);
+                    String sentiment = jsonResponse.getString("sentiment"); // Đọc dữ liệu đúng key
                     runOnUiThread(() -> {
                         resultText.setText("Sentiment: " + sentiment);
                         updateEmoji(sentiment);
@@ -152,10 +143,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateEmoji(String sentiment) {
-        if (sentiment.equals("Tích cực")) {
+        if (sentiment.equals("Positive")) {
             emojiView.setImageResource(R.drawable.happy_face);
             emojiView.setVisibility(View.VISIBLE);
-        } else if (sentiment.equals("Tiêu cực")) {
+        } else if (sentiment.equals("Negative")) {
             emojiView.setImageResource(R.drawable.sad_face);
             emojiView.setVisibility(View.VISIBLE);
         } else {
